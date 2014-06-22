@@ -117,12 +117,18 @@ class ProductosController extends \BaseController {
 
         if ($producto->isValid($data))
         {
-        	//$imagen_producto = $data['product_image']->getClientOriginalName();
+        	$imagen_producto = NULL;
+        	$imagen_anterior = NULL;
+
+        	if(isset($data['product_image'])){
+        		$imagen_producto = $data['product_image']->getClientOriginalName();
+        		$imagen_anterior = $producto->product_image;
+        		$producto->product_image = $imagen_producto;
+        	}        	
 
             $producto->category_id = $data['category_id'];
             $producto->product_name = $data['product_name'];
-            $producto->price = $data['price'];
-            //$producto->product_image = $imagen_producto;
+            $producto->price = $data['price'];            
             $producto->description = $data['description'];
 
             if(!isset($data['destacado'])) {
@@ -132,7 +138,29 @@ class ProductosController extends \BaseController {
 
             $producto->save();
 
-            //$data["product_image"]->move('almacen', $imagen_producto);
+            // si existe la variable $imagen_producto significa que se ha modificado la imagen del producto
+            // por lo que eliminamos la imagen antigua de la carpeta y subimos la nueva.
+
+            if(isset($imagen_producto)){
+
+            	//busco si existe una imagen con el mismo nombre en la base de datos
+            	// si existe no la elimino de la carpeta
+            	$imagenes = Product::lists('product_image');
+
+            	$flag = true;
+            	foreach ($imagenes as $img) {
+            		if($img == $imagen_anterior){
+            			$flag = false;
+            		}
+            	}
+
+            	if($flag) {
+            		$destinationPath = 'almacen/';
+		    		File::delete($destinationPath . $imagen_anterior);
+            	}
+
+		    	$data["product_image"]->move('almacen', $imagen_producto);
+            }
 
             return Redirect::route('panel.productos.index');
         }

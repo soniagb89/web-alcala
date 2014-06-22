@@ -30,6 +30,7 @@
             <div class="form-group col-md-4">
                 {{ Form::label('product_image', 'Imagen producto') }}<br>
                 {{ Form::file('product_image', ['class' => 'btn btn-default', 'title' => 'Seleccionar imagen']) }}
+                <span class="file-input-name">{{ $producto->product_image }}</span>
             </div>
             <div class="form-group col-md-4">
                 {{ Form::label('price', 'Precio') }}
